@@ -11,6 +11,7 @@
 #include <misc/IdentifyGpu.h>
 
 #include <with_dx12/with_dx12.h>
+#include "../dlssnr/submission/SubmissionHooks.h"
 
 void IFeature_Dx11wDx12::ResourceBarrier(ID3D12GraphicsCommandList* commandList, ID3D12Resource* resource,
                                          D3D12_RESOURCE_STATES beforeState, D3D12_RESOURCE_STATES afterState)
@@ -48,8 +49,11 @@ bool IFeature_Dx11wDx12::CreateD3D12Objects()
         if (Dx12CommandList[i] == nullptr && Dx12CommandAllocator[i] != nullptr)
         {
             // CreateCommandList
-            result = _dx11on12Device->CreateCommandList(0, Dx12CommandListType, Dx12CommandAllocator[i], nullptr,
-                                                        IID_PPV_ARGS(&Dx12CommandList[i]));
+            // result = _dx11on12Device->CreateCommandList(0, Dx12CommandListType, Dx12CommandAllocator[i], nullptr,
+            //                                             IID_PPV_ARGS(&Dx12CommandList[i]));
+            result = DlssNr::Submission::Hooks::CreateProxiedCommandList(
+                    _dx11on12Device, 0, Dx12CommandListType, Dx12CommandAllocator[i], nullptr,
+                    IID_PPV_ARGS(&Dx12CommandList[i]));
 
             if (result != S_OK)
             {
